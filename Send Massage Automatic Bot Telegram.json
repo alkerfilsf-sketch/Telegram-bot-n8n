@@ -1,0 +1,375 @@
+{
+  "name": "Send Massage Automatic Bot Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// Ambil data dari node Poll for messages\nconst messageData = $input.first().json;\n\n// Cek apakah ada pesan\nif (!messageData || !messageData.message || !messageData.message.text) {\n  return null;  // Tidak ada pesan, hentikan workflow\n}\n\n// Ekstrak data penting\nconst chatId = messageData.message.chat.id;\nconst messageText = messageData.message.text;\n\n// Output untuk AI Agent (tanpa memory)\nreturn {\n  chat_id: chatId,\n  text: messageText\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -848,
+        128
+      ],
+      "id": "7a2eccf1-6091-4657-9411-250b18b07498",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "limit": 900,
+        "timeout": 500,
+        "allowed_updates": [
+          "message"
+        ]
+      },
+      "type": "n8n-nodes-telegram-getupdates-api.telegramGetUpdates",
+      "typeVersion": 1,
+      "position": [
+        -1232,
+        128
+      ],
+      "id": "53b05c2c-c197-4dcf-b5b9-2eea2c0868e3",
+      "name": "Poll for messages",
+      "executeOnce": false,
+      "retryOnFail": false,
+      "credentials": {
+        "botTokenTelegramApi": {
+          "id": "jOQgrX68AwSv7RbY",
+          "name": "Telegram Bot Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8609894684:AAGZizL5Tdf6op4aXLdgDIJqNXXOenpcOWU/sendMessage",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "={{ $('Code in JavaScript').item.json.chat_id }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.content.parts[0].text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        160,
+        112
+      ],
+      "id": "d567f1dd-759a-49aa-97b0-5b2ac21abc70",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "content": "## Trigger Telegram\nTrigger Atomatis disaat ada pesan baru. \nTahapan:\n1. Masukkan dan setting Credential anda yang sesuai dengan Api bot Telegram anda.",
+        "height": 432,
+        "width": 320,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1344,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "16a9efc9-bacf-4cc3-a0df-93e8b8b466fc",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Code and If\nCode sebagai Node untuk menstruktur sebuah pertanyaan atau sapaan.\nIF sebagai Perbandingan antara dua jalur yaitu jika pesan masuk maka akan dibandingkan oleh node ini sesuai dengan value yang diberikan.\nTahapan:\n1. Isilah value pertama dengan mendrag and drop output node poll for massage ke value pertama.\n2. Dibagian Operation, pilihlah Contain.\n3. Isi value ke 2 dengan sapaan seperti \"Halo\".",
+        "height": 432,
+        "width": 416,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1008,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "8880d67f-9bce-4c9b-a9a3-e554d331d861",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Ai sebagai Jawaban dari setiap Pertanyaan Mudah\nAi Agent sebagai Penjawab dari setiap Pertanyaan yang tidak membutuhkan jawaban panjang.\nTahapan:\n1. Pada Source for Prompt, Pilihlah Define Below.\n2. Lalu pada Prompt, Drag and Drop text dari Node Code ke Prompt.\n3. Lalu pada option, Pilih System Massage.\n4. Pada System Massage berikan perintah untuk menetukan cara kerja Ai.",
+        "height": 608,
+        "width": 544,
+        "color": "#15022E"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -576,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "aa05b50d-2540-433e-96c5-492e984fe6c9",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Kirim Pesan dari Jawaban AI\nKegunaan Node ini hampir sama seperti Node http request diatas, hanya saja Node ini bertugas untuk Mengirim Balasan pesan dari setiap Pertanyaan dengan AI",
+        "height": 496,
+        "width": 448,
+        "color": "#340636"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -16,
+        -144
+      ],
+      "typeVersion": 1,
+      "id": "9c4ef3a1-275a-45d2-8d1e-faace3590fc1",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.1-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.1-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.text }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "systemMessage": "Kamu adalah Asisten yang menjawab setiap pertanyaan dengan Cool dan Manipulatif, Tools yang kamu punya adalah Tools http request untuk mencari informasi data cuaca, lalu Tools SearchApi untuk mencari informasi yang membutuhkan data internet. Jika pertanyaan terkait dengan isi 'Fihi Ma Fihi', gunakan tool vector search untuk mencari jawabannya."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -480,
+        128
+      ],
+      "id": "e88ac00f-771b-469e-9b58-3ec897b37e3a",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Eri02MkK5Fhzq1oA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.bmkg.go.id/publik/prakiraan-cuaca",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googlePalmApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        -432,
+        304
+      ],
+      "id": "2fd7e802-5592-4550-aad8-835b0048233d",
+      "name": "HTTP Request",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Eri02MkK5Fhzq1oA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "q": "={{ $json.text }}",
+        "locationSettings": {
+          "google_domain": "google.com"
+        },
+        "languageSettings": {},
+        "searchOptions": {
+          "optimization_strategy": "performance",
+          "safe": "active"
+        },
+        "timeFilters": {},
+        "pagination": {},
+        "advancedOptions": {},
+        "requestOptions": {}
+      },
+      "type": "@searchapi/n8n-nodes-searchapi.searchApiTool",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        304
+      ],
+      "id": "9a858209-393b-4311-aa73-26d1b7756f3f",
+      "name": "Search google in SearchApi",
+      "credentials": {
+        "searchApi": {
+          "id": "vAyOPVgChm8K1P3z",
+          "name": "SearchApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Gunakan tool ini untuk mencari informasi dari buku 'Fihi Ma Fihi' karya Jalaluddin Rumi. Panggil tool ini jika pertanyaan pengguna merujuk pada isi buku tersebut, konsep tasawuf, atau ajaran Rumi.",
+        "mongoCollection": {
+          "__rl": true,
+          "value": "Library",
+          "mode": "list",
+          "cachedResultName": "Library"
+        },
+        "metadata_field": "metadata",
+        "vectorIndexName": "vector_index",
+        "topK": 5,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreMongoDBAtlas",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        400
+      ],
+      "id": "23822a9c-7053-409c-8a1c-c0353a08bc99",
+      "name": "MongoDB Atlas Vector Store",
+      "credentials": {
+        "mongoDb": {
+          "id": "2bRY2SSYuNHo0QZX",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "BAAI/bge-base-en-v1.5",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        48,
+        560
+      ],
+      "id": "b3d5ab48-0eb0-42ad-9d16-22154977f116",
+      "name": "Embeddings HuggingFace Inference",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "iZExkCkkwy5sNFDE",
+          "name": "Hugging Face account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Poll for messages": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        []
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "Message a model",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search google in SearchApi": {
+      "ai_tool": [
+        [
+          {
+            "node": "Message a model",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MongoDB Atlas Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "Message a model",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace Inference": {
+      "ai_embedding": [
+        [
+          {
+            "node": "MongoDB Atlas Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "4U6VJQMoSBSw7ogA",
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "bff1b88b-fbb7-4590-99e9-3bfd05015dcb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8aa4f02203e96b3bd3c37cb2b0e7edfdde9acc3986efdd0f5d2aeecb67c20b32"
+  },
+  "id": "JkQE9XPZAfTnQbmK",
+  "tags": []
+}
